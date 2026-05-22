@@ -1,0 +1,648 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#0f766e">
+<title>جرد المستودعات</title>
+<link rel="manifest" href="manifest.json">
+<style>
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Tahoma, "Droid Arabic Naskh", sans-serif;
+    background: #f1f5f9;
+    color: #0f172a;
+    padding-bottom: 80px;
+  }
+  header {
+    background: linear-gradient(135deg, #0f766e, #14b8a6);
+    color: #fff;
+    padding: 16px;
+    text-align: center;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    position: sticky;
+    top: 0;
+    z-index: 10;
+  }
+  header h1 { margin: 0; font-size: 20px; }
+  header .sub { font-size: 12px; opacity: 0.9; margin-top: 4px; }
+  nav {
+    display: flex;
+    background: #fff;
+    border-top: 1px solid #e2e8f0;
+    box-shadow: 0 -2px 8px rgba(0,0,0,0.05);
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 10;
+  }
+  nav button {
+    flex: 1;
+    background: none;
+    border: none;
+    padding: 10px 4px;
+    font-size: 12px;
+    color: #64748b;
+    cursor: pointer;
+    font-family: inherit;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+  }
+  nav button.active { color: #0f766e; font-weight: bold; }
+  nav button .icon { font-size: 20px; }
+  main { padding: 16px; max-width: 720px; margin: 0 auto; }
+  .page { display: none; }
+  .page.active { display: block; }
+  .card {
+    background: #fff;
+    border-radius: 12px;
+    padding: 16px;
+    margin-bottom: 12px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+  }
+  .card h2 { margin: 0 0 12px; font-size: 16px; color: #0f766e; }
+  label { display: block; font-size: 13px; color: #475569; margin-bottom: 4px; margin-top: 8px; }
+  input, select, textarea {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    font-size: 15px;
+    font-family: inherit;
+    background: #fff;
+  }
+  input:focus, select:focus, textarea:focus { outline: 2px solid #14b8a6; border-color: #14b8a6; }
+  button.primary, button.danger, button.secondary {
+    width: 100%;
+    padding: 12px;
+    border: none;
+    border-radius: 8px;
+    font-size: 15px;
+    font-weight: bold;
+    cursor: pointer;
+    margin-top: 12px;
+    font-family: inherit;
+  }
+  button.primary { background: #0f766e; color: #fff; }
+  button.primary:active { background: #115e59; }
+  button.danger { background: #ef4444; color: #fff; }
+  button.secondary { background: #e2e8f0; color: #0f172a; }
+  .row { display: flex; gap: 8px; }
+  .row > * { flex: 1; }
+  .item {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 12px;
+    margin-bottom: 8px;
+  }
+  .item-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 4px;
+  }
+  .item-name { font-weight: bold; color: #0f172a; }
+  .item-qty {
+    background: #0f766e;
+    color: #fff;
+    padding: 2px 10px;
+    border-radius: 999px;
+    font-size: 13px;
+  }
+  .item-meta { font-size: 12px; color: #64748b; }
+  .empty { text-align: center; color: #94a3b8; padding: 32px 16px; font-size: 14px; }
+  .stat-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+    margin-bottom: 12px;
+  }
+  .stat {
+    background: #fff;
+    border-radius: 10px;
+    padding: 12px;
+    text-align: center;
+    border: 1px solid #e2e8f0;
+  }
+  .stat .num { font-size: 22px; font-weight: bold; color: #0f766e; }
+  .stat .lbl { font-size: 12px; color: #64748b; margin-top: 2px; }
+  .del-btn {
+    background: #fee2e2;
+    color: #b91c1c;
+    border: none;
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-size: 12px;
+    cursor: pointer;
+    font-family: inherit;
+  }
+  .filter-bar {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 12px;
+    flex-wrap: wrap;
+  }
+  .filter-bar > * { flex: 1; min-width: 120px; }
+  .badge {
+    display: inline-block;
+    background: #ecfeff;
+    color: #0e7490;
+    padding: 2px 8px;
+    border-radius: 999px;
+    font-size: 11px;
+    margin-inline-start: 6px;
+  }
+  .low-stock { background: #fef3c7; color: #92400e; }
+  .out-stock { background: #fee2e2; color: #991b1b; }
+  .toast {
+    position: fixed;
+    bottom: 90px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #0f172a;
+    color: #fff;
+    padding: 10px 20px;
+    border-radius: 999px;
+    font-size: 14px;
+    opacity: 0;
+    transition: opacity 0.3s;
+    z-index: 20;
+    pointer-events: none;
+  }
+  .toast.show { opacity: 1; }
+  details { margin-top: 8px; }
+  details summary {
+    cursor: pointer;
+    padding: 8px;
+    background: #f1f5f9;
+    border-radius: 6px;
+    font-size: 13px;
+  }
+  .export-row { display: flex; gap: 8px; margin-top: 12px; }
+  .export-row button { flex: 1; margin-top: 0; }
+</style>
+</head>
+<body>
+<header>
+  <h1>برنامج جرد المستودعات</h1>
+  <div class="sub">إدارة الأصناف والمصروف اليومي</div>
+</header>
+
+<main>
+  <!-- الرئيسية -->
+  <div class="page active" id="page-home">
+    <div class="stat-grid">
+      <div class="stat"><div class="num" id="stat-items">0</div><div class="lbl">عدد الأصناف</div></div>
+      <div class="stat"><div class="num" id="stat-total">0</div><div class="lbl">إجمالي الرصيد</div></div>
+      <div class="stat"><div class="num" id="stat-today">0</div><div class="lbl">صرف اليوم</div></div>
+      <div class="stat"><div class="num" id="stat-sites">0</div><div class="lbl">عدد المواقع</div></div>
+    </div>
+    <div class="card">
+      <h2>تنبيهات المخزون</h2>
+      <div id="alerts-list"></div>
+    </div>
+    <div class="card">
+      <h2>آخر العمليات</h2>
+      <div id="recent-list"></div>
+    </div>
+  </div>
+
+  <!-- الأصناف -->
+  <div class="page" id="page-items">
+    <div class="card">
+      <h2>إضافة صنف جديد</h2>
+      <label>اسم الصنف</label>
+      <input type="text" id="item-name" placeholder="مثال: كرتون مياه">
+      <div class="row">
+        <div>
+          <label>الوحدة</label>
+          <input type="text" id="item-unit" placeholder="كرتون / حبة / كيلو">
+        </div>
+        <div>
+          <label>الكمية الافتتاحية</label>
+          <input type="number" id="item-opening" min="0" value="0">
+        </div>
+      </div>
+      <div class="row">
+        <div>
+          <label>حد التنبيه</label>
+          <input type="number" id="item-min" min="0" value="0">
+        </div>
+        <div>
+          <label>الفئة</label>
+          <input type="text" id="item-cat" placeholder="اختياري">
+        </div>
+      </div>
+      <button class="primary" onclick="addItem()">إضافة الصنف</button>
+    </div>
+    <div class="card">
+      <h2>الأصناف والرصيد</h2>
+      <input type="text" id="search-item" placeholder="بحث..." oninput="renderItems()">
+      <div id="items-list" style="margin-top:12px"></div>
+    </div>
+  </div>
+
+  <!-- المصروف -->
+  <div class="page" id="page-issue">
+    <div class="card">
+      <h2>صرف بضاعة</h2>
+      <label>التاريخ</label>
+      <input type="date" id="issue-date">
+      <label>الموقع</label>
+      <input type="text" id="issue-site" list="sites-list" placeholder="اسم الموقع">
+      <datalist id="sites-list"></datalist>
+      <label>الصنف</label>
+      <select id="issue-item"></select>
+      <div class="row">
+        <div>
+          <label>الكمية</label>
+          <input type="number" id="issue-qty" min="1" value="1">
+        </div>
+        <div>
+          <label>المستلم</label>
+          <input type="text" id="issue-receiver" placeholder="اختياري">
+        </div>
+      </div>
+      <label>ملاحظات</label>
+      <input type="text" id="issue-note" placeholder="اختياري">
+      <button class="primary" onclick="addIssue()">تسجيل الصرف</button>
+    </div>
+    <div class="card">
+      <h2>سجل المصروف</h2>
+      <div class="filter-bar">
+        <input type="date" id="filter-date" oninput="renderIssues()">
+        <input type="text" id="filter-site" placeholder="فلترة بالموقع" oninput="renderIssues()">
+      </div>
+      <div id="issues-list"></div>
+    </div>
+  </div>
+
+  <!-- الإعدادات -->
+  <div class="page" id="page-settings">
+    <div class="card">
+      <h2>النسخ الاحتياطي</h2>
+      <p style="font-size:13px;color:#64748b;margin:0">احفظ نسخة من بياناتك أو استرجعها على جهاز آخر.</p>
+      <div class="export-row">
+        <button class="secondary" onclick="exportData()">تصدير</button>
+        <button class="secondary" onclick="document.getElementById('import-file').click()">استيراد</button>
+      </div>
+      <input type="file" id="import-file" accept=".json" style="display:none" onchange="importData(event)">
+      <button class="secondary" onclick="exportCSV()">تصدير CSV (المصروف)</button>
+    </div>
+    <div class="card">
+      <h2>مسح البيانات</h2>
+      <p style="font-size:13px;color:#64748b;margin:0">احذف جميع الأصناف والعمليات. هذا الإجراء لا يمكن التراجع عنه.</p>
+      <button class="danger" onclick="resetAll()">حذف كل البيانات</button>
+    </div>
+    <div class="card">
+      <h2>عن التطبيق</h2>
+      <p style="font-size:13px;color:#64748b;margin:0">
+        برنامج جرد مستودعات يعمل على الجوال. يحفظ البيانات محلياً على جهازك دون الحاجة إلى إنترنت.
+      </p>
+    </div>
+  </div>
+</main>
+
+<nav>
+  <button class="active" data-page="home" onclick="showPage('home')">
+    <span class="icon">🏠</span><span>الرئيسية</span>
+  </button>
+  <button data-page="items" onclick="showPage('items')">
+    <span class="icon">📦</span><span>الأصناف</span>
+  </button>
+  <button data-page="issue" onclick="showPage('issue')">
+    <span class="icon">📤</span><span>صرف</span>
+  </button>
+  <button data-page="settings" onclick="showPage('settings')">
+    <span class="icon">⚙️</span><span>الإعدادات</span>
+  </button>
+</nav>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const STORAGE_KEY = 'warehouse_v1';
+
+function loadDB() {
+  try {
+    return JSON.parse(localStorage.getItem(STORAGE_KEY)) || { items: [], issues: [] };
+  } catch {
+    return { items: [], issues: [] };
+  }
+}
+function saveDB(db) { localStorage.setItem(STORAGE_KEY, JSON.stringify(db)); }
+function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2, 6); }
+function todayStr() { return new Date().toISOString().slice(0, 10); }
+
+function toast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(t._h);
+  t._h = setTimeout(() => t.classList.remove('show'), 1800);
+}
+
+function showPage(name) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
+  document.getElementById('page-' + name).classList.add('active');
+  document.querySelector(`nav button[data-page="${name}"]`).classList.add('active');
+  if (name === 'home') renderHome();
+  if (name === 'items') renderItems();
+  if (name === 'issue') { fillIssueForm(); renderIssues(); }
+}
+
+function getBalance(itemId) {
+  const db = loadDB();
+  const item = db.items.find(i => i.id === itemId);
+  if (!item) return 0;
+  const issued = db.issues.filter(s => s.itemId === itemId).reduce((a, s) => a + s.qty, 0);
+  return item.opening - issued;
+}
+
+function addItem() {
+  const name = document.getElementById('item-name').value.trim();
+  if (!name) return toast('أدخل اسم الصنف');
+  const db = loadDB();
+  db.items.push({
+    id: uid(),
+    name,
+    unit: document.getElementById('item-unit').value.trim() || 'حبة',
+    opening: Number(document.getElementById('item-opening').value) || 0,
+    minQty: Number(document.getElementById('item-min').value) || 0,
+    category: document.getElementById('item-cat').value.trim(),
+    createdAt: Date.now()
+  });
+  saveDB(db);
+  ['item-name','item-unit','item-cat'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('item-opening').value = 0;
+  document.getElementById('item-min').value = 0;
+  toast('تمت إضافة الصنف');
+  renderItems();
+}
+
+function deleteItem(id) {
+  if (!confirm('حذف هذا الصنف وجميع عمليات الصرف المرتبطة به؟')) return;
+  const db = loadDB();
+  db.items = db.items.filter(i => i.id !== id);
+  db.issues = db.issues.filter(s => s.itemId !== id);
+  saveDB(db);
+  toast('تم الحذف');
+  renderItems();
+}
+
+function adjustItem(id) {
+  const db = loadDB();
+  const item = db.items.find(i => i.id === id);
+  if (!item) return;
+  const val = prompt(`الرصيد الافتتاحي الحالي: ${item.opening}\nأدخل الرصيد الافتتاحي الجديد:`, item.opening);
+  if (val === null) return;
+  const num = Number(val);
+  if (isNaN(num) || num < 0) return toast('قيمة غير صحيحة');
+  item.opening = num;
+  saveDB(db);
+  renderItems();
+  toast('تم التعديل');
+}
+
+function renderItems() {
+  const db = loadDB();
+  const q = document.getElementById('search-item').value.trim().toLowerCase();
+  const list = document.getElementById('items-list');
+  let items = db.items.slice().sort((a,b) => a.name.localeCompare(b.name, 'ar'));
+  if (q) items = items.filter(i => i.name.toLowerCase().includes(q) || (i.category||'').toLowerCase().includes(q));
+  if (items.length === 0) {
+    list.innerHTML = '<div class="empty">لا توجد أصناف. أضف أول صنف من الأعلى.</div>';
+    return;
+  }
+  list.innerHTML = items.map(i => {
+    const bal = getBalance(i.id);
+    let badge = '';
+    if (bal <= 0) badge = '<span class="badge out-stock">نفد</span>';
+    else if (i.minQty > 0 && bal <= i.minQty) badge = '<span class="badge low-stock">منخفض</span>';
+    return `
+      <div class="item">
+        <div class="item-head">
+          <div class="item-name">${escapeHtml(i.name)}${badge}</div>
+          <div class="item-qty">${bal} ${escapeHtml(i.unit)}</div>
+        </div>
+        <div class="item-meta">
+          افتتاحي: ${i.opening} • ${i.category ? 'الفئة: ' + escapeHtml(i.category) + ' • ' : ''}حد التنبيه: ${i.minQty}
+        </div>
+        <div style="display:flex;gap:6px;margin-top:8px">
+          <button class="del-btn" onclick="adjustItem('${i.id}')">تعديل الرصيد</button>
+          <button class="del-btn" onclick="deleteItem('${i.id}')">حذف</button>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function fillIssueForm() {
+  const db = loadDB();
+  const sel = document.getElementById('issue-item');
+  const items = db.items.slice().sort((a,b) => a.name.localeCompare(b.name, 'ar'));
+  sel.innerHTML = items.length
+    ? items.map(i => `<option value="${i.id}">${escapeHtml(i.name)} (${getBalance(i.id)} ${escapeHtml(i.unit)})</option>`).join('')
+    : '<option value="">— لا توجد أصناف —</option>';
+  const dl = document.getElementById('sites-list');
+  const sites = [...new Set(db.issues.map(s => s.site))];
+  dl.innerHTML = sites.map(s => `<option value="${escapeHtml(s)}">`).join('');
+  if (!document.getElementById('issue-date').value) {
+    document.getElementById('issue-date').value = todayStr();
+  }
+}
+
+function addIssue() {
+  const db = loadDB();
+  const itemId = document.getElementById('issue-item').value;
+  const site = document.getElementById('issue-site').value.trim();
+  const qty = Number(document.getElementById('issue-qty').value);
+  const date = document.getElementById('issue-date').value || todayStr();
+  if (!itemId) return toast('اختر صنفاً');
+  if (!site) return toast('أدخل الموقع');
+  if (!qty || qty <= 0) return toast('أدخل كمية صحيحة');
+  const bal = getBalance(itemId);
+  if (qty > bal) {
+    if (!confirm(`الرصيد المتاح ${bal} فقط. هل تريد الصرف رغم ذلك (سيظهر بالسالب)؟`)) return;
+  }
+  db.issues.push({
+    id: uid(),
+    itemId, site, qty, date,
+    receiver: document.getElementById('issue-receiver').value.trim(),
+    note: document.getElementById('issue-note').value.trim(),
+    createdAt: Date.now()
+  });
+  saveDB(db);
+  document.getElementById('issue-qty').value = 1;
+  document.getElementById('issue-receiver').value = '';
+  document.getElementById('issue-note').value = '';
+  toast('تم تسجيل الصرف');
+  fillIssueForm();
+  renderIssues();
+}
+
+function deleteIssue(id) {
+  if (!confirm('حذف هذه العملية؟ سيُعاد الرصيد.')) return;
+  const db = loadDB();
+  db.issues = db.issues.filter(s => s.id !== id);
+  saveDB(db);
+  renderIssues();
+  toast('تم الحذف');
+}
+
+function renderIssues() {
+  const db = loadDB();
+  const fdate = document.getElementById('filter-date').value;
+  const fsite = document.getElementById('filter-site').value.trim().toLowerCase();
+  let rows = db.issues.slice().sort((a,b) => b.createdAt - a.createdAt);
+  if (fdate) rows = rows.filter(r => r.date === fdate);
+  if (fsite) rows = rows.filter(r => r.site.toLowerCase().includes(fsite));
+  const list = document.getElementById('issues-list');
+  if (rows.length === 0) {
+    list.innerHTML = '<div class="empty">لا توجد عمليات صرف.</div>';
+    return;
+  }
+  list.innerHTML = rows.map(r => {
+    const item = db.items.find(i => i.id === r.itemId);
+    return `
+      <div class="item">
+        <div class="item-head">
+          <div class="item-name">${item ? escapeHtml(item.name) : '— صنف محذوف —'}</div>
+          <div class="item-qty">${r.qty} ${item ? escapeHtml(item.unit) : ''}</div>
+        </div>
+        <div class="item-meta">
+          📍 ${escapeHtml(r.site)} • 📅 ${r.date}
+          ${r.receiver ? ' • 👤 ' + escapeHtml(r.receiver) : ''}
+        </div>
+        ${r.note ? `<div class="item-meta">📝 ${escapeHtml(r.note)}</div>` : ''}
+        <div style="margin-top:8px"><button class="del-btn" onclick="deleteIssue('${r.id}')">حذف</button></div>
+      </div>
+    `;
+  }).join('');
+}
+
+function renderHome() {
+  const db = loadDB();
+  document.getElementById('stat-items').textContent = db.items.length;
+  document.getElementById('stat-total').textContent = db.items.reduce((a,i) => a + getBalance(i.id), 0);
+  const today = todayStr();
+  document.getElementById('stat-today').textContent = db.issues.filter(s => s.date === today).reduce((a,s) => a + s.qty, 0);
+  document.getElementById('stat-sites').textContent = new Set(db.issues.map(s => s.site)).size;
+
+  const alerts = db.items
+    .map(i => ({ i, bal: getBalance(i.id) }))
+    .filter(x => x.bal <= 0 || (x.i.minQty > 0 && x.bal <= x.i.minQty));
+  const alertsBox = document.getElementById('alerts-list');
+  alertsBox.innerHTML = alerts.length === 0
+    ? '<div class="empty">لا توجد تنبيهات. المخزون بحالة جيدة ✅</div>'
+    : alerts.map(x => `
+        <div class="item">
+          <div class="item-head">
+            <div class="item-name">${escapeHtml(x.i.name)}
+              ${x.bal <= 0 ? '<span class="badge out-stock">نفد</span>' : '<span class="badge low-stock">منخفض</span>'}
+            </div>
+            <div class="item-qty">${x.bal} ${escapeHtml(x.i.unit)}</div>
+          </div>
+        </div>
+      `).join('');
+
+  const recent = db.issues.slice().sort((a,b) => b.createdAt - a.createdAt).slice(0, 5);
+  const recentBox = document.getElementById('recent-list');
+  recentBox.innerHTML = recent.length === 0
+    ? '<div class="empty">لا توجد عمليات بعد.</div>'
+    : recent.map(r => {
+        const item = db.items.find(i => i.id === r.itemId);
+        return `
+          <div class="item">
+            <div class="item-head">
+              <div class="item-name">${item ? escapeHtml(item.name) : '— محذوف —'}</div>
+              <div class="item-qty">${r.qty} ${item ? escapeHtml(item.unit) : ''}</div>
+            </div>
+            <div class="item-meta">📍 ${escapeHtml(r.site)} • 📅 ${r.date}</div>
+          </div>
+        `;
+      }).join('');
+}
+
+function exportData() {
+  const data = localStorage.getItem(STORAGE_KEY) || '{}';
+  const blob = new Blob([data], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `warehouse-backup-${todayStr()}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+  toast('تم تصدير النسخة');
+}
+
+function importData(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = ev => {
+    try {
+      const data = JSON.parse(ev.target.result);
+      if (!data.items || !data.issues) throw new Error();
+      if (!confirm('سيتم استبدال جميع البيانات الحالية. متابعة؟')) return;
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+      toast('تم الاستيراد');
+      renderHome();
+    } catch {
+      toast('ملف غير صالح');
+    }
+  };
+  reader.readAsText(file);
+  e.target.value = '';
+}
+
+function exportCSV() {
+  const db = loadDB();
+  if (db.issues.length === 0) return toast('لا توجد بيانات للتصدير');
+  const rows = [['التاريخ','الموقع','الصنف','الكمية','الوحدة','المستلم','ملاحظات']];
+  db.issues.slice().sort((a,b) => a.createdAt - b.createdAt).forEach(r => {
+    const item = db.items.find(i => i.id === r.itemId);
+    rows.push([
+      r.date, r.site,
+      item ? item.name : '(محذوف)',
+      r.qty,
+      item ? item.unit : '',
+      r.receiver || '', r.note || ''
+    ]);
+  });
+  const csv = '﻿' + rows.map(r => r.map(c => `"${String(c).replace(/"/g,'""')}"`).join(',')).join('\n');
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `disbursements-${todayStr()}.csv`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+function resetAll() {
+  if (!confirm('سيتم حذف جميع البيانات نهائياً. هل أنت متأكد؟')) return;
+  if (!confirm('تأكيد أخير: حذف كل شيء؟')) return;
+  localStorage.removeItem(STORAGE_KEY);
+  toast('تم المسح');
+  renderHome();
+}
+
+function escapeHtml(s) {
+  return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('sw.js').catch(() => {});
+}
+
+renderHome();
+</script>
+</body>
+</html>
