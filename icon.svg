@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <rect width="512" height="512" rx="96" fill="#0f766e"/>
+  <g transform="translate(96 112)" fill="none" stroke="#fff" stroke-width="20" stroke-linejoin="round" stroke-linecap="round">
+    <path d="M0 60 L160 0 L320 60 L320 240 L160 300 L0 240 Z" fill="#14b8a6"/>
+    <path d="M0 60 L160 120 L320 60"/>
+    <path d="M160 120 L160 300"/>
+    <path d="M80 30 L80 210 L80 210"/>
+  </g>
+  <text x="256" y="450" text-anchor="middle" fill="#fff" font-family="Tahoma, sans-serif" font-size="56" font-weight="bold">مستودع</text>
+</svg>
