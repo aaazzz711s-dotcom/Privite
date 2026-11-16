@@ -516,30 +516,30 @@ function olive(x, z) {
 function bedroom(s) {           // s = -1 left (bedroom 1), +1 right (bedroom 2)
   const X = (u) => s * (3.3 - u);   // u = distance from the outside side wall
   const bx = (u0, u1, y0, y1, z0, z1, mat, o) => boxMM(Math.min(X(u0), X(u1)), Math.max(X(u0), X(u1)), y0, y1, z0, z1, mat, o);
-  const zc = 0.1;
-  bx(0.5, 2.35, F, F + 0.012, zc - 1.3, zc + 1.3, M.rug, { cast: false, uv: 0 });
+  const zc = 0.0;   // bed: 1.80 x 2.00 m mattress
+  bx(0.5, 2.38, F, F + 0.012, zc - 1.4, zc + 1.4, M.rug, { cast: false, uv: 0 });
   // upholstered channel headboard
-  for (let i = 0; i < 5; i++) { const z0 = zc - 1.0 + i * 0.4; bx(0.0, 0.1, F + 0.32, F + 1.3, z0 + 0.008, z0 + 0.392, M.fabric, { r: 0.035 }); }
+  for (let i = 0; i < 5; i++) { const z0 = zc - 1.1 + i * 0.44; bx(0.0, 0.1, F + 0.32, F + 1.3, z0 + 0.008, z0 + 0.432, M.fabric, { r: 0.035 }); }
   // bed
-  bx(0.25, 1.95, F, F + 0.1, zc - 0.7, zc + 0.7, M.dark);
-  bx(0.1, 2.1, F + 0.1, F + 0.38, zc - 0.84, zc + 0.84, M.fabric, { r: 0.04 });
-  bx(0.14, 2.06, F + 0.38, F + 0.6, zc - 0.8, zc + 0.8, M.linen, { r: 0.06 });
-  bx(0.72, 2.12, F + 0.4, F + 0.665, zc - 0.86, zc + 0.86, M.linen, { r: 0.05 });
-  bx(0.66, 0.86, F + 0.58, F + 0.7, zc - 0.85, zc + 0.85, M.linen, { r: 0.05 });
-  bx(1.5, 2.16, F + 0.44, F + 0.715, zc - 0.9, zc + 0.9, M.olive, { r: 0.04 });
-  for (const dz of [-0.4, 0.4]) { const p = rbox(0.16, 0.46, 0.7, 0.07, M.linen, X(0.3), F + 0.8, zc + dz); p.rotation.z = -s * 0.3; }
-  for (const [du, dz, mat] of [[0.46, -0.3, M.olive], [0.46, 0.3, M.olive], [0.54, 0, M.sage]]) {
+  bx(0.25, 1.98, F, F + 0.1, zc - 0.8, zc + 0.8, M.dark);
+  bx(0.1, 2.14, F + 0.1, F + 0.38, zc - 0.94, zc + 0.94, M.fabric, { r: 0.04 });
+  bx(0.12, 2.12, F + 0.38, F + 0.6, zc - 0.9, zc + 0.9, M.linen, { r: 0.06 });
+  bx(0.74, 2.16, F + 0.4, F + 0.665, zc - 0.96, zc + 0.96, M.linen, { r: 0.05 });
+  bx(0.68, 0.88, F + 0.58, F + 0.7, zc - 0.95, zc + 0.95, M.linen, { r: 0.05 });
+  bx(1.54, 2.2, F + 0.44, F + 0.715, zc - 1.0, zc + 1.0, M.olive, { r: 0.04 });
+  for (const dz of [-0.45, 0.45]) { const p = rbox(0.16, 0.46, 0.7, 0.07, M.linen, X(0.3), F + 0.8, zc + dz); p.rotation.z = -s * 0.3; }
+  for (const [du, dz, mat] of [[0.46, -0.34, M.olive], [0.46, 0.34, M.olive], [0.54, 0, M.sage]]) {
     const p = rbox(0.13, 0.36, mat === M.sage ? 0.42 : 0.5, 0.06, mat, X(du), F + 0.77, zc + dz); p.rotation.z = -s * 0.22;
   }
   // nightstands + lamps
   for (const sz of [-1, 1]) {
-    const z0 = zc + sz * 1.3;
+    const z0 = zc + sz * 1.4;
     bx(0.04, 0.5, F, F + 0.52, z0 - 0.24, z0 + 0.24, M.wood);
     bx(0.5, 0.506, F + 0.33, F + 0.336, z0 - 0.22, z0 + 0.22, M.dark, { cast: false });
     bx(0.5, 0.52, F + 0.42, F + 0.432, z0 - 0.08, z0 + 0.08, M.blackMetal);
     lamp(X(0.27), F + 0.52, z0);
     // timber slat panels flanking the bed + vertical LED
-    const za = zc + sz * 1.02, zb = zc + sz * 1.7;
+    const za = zc + sz * 1.12, zb = zc + sz * 1.8;
     bx(0, 0.01, F, CEIL, Math.min(za, zb), Math.max(za, zb), M.dark, { cast: false });
     slats('z', Math.min(za, zb), Math.max(za, zb), Math.min(X(0.01), X(0.035)), Math.max(X(0.01), X(0.035)), () => [F, CEIL], M.slat);
     bx(0.0, 0.03, F + 0.05, CEIL - 0.05, za - 0.008, za + 0.008, M.led, { cast: false });
@@ -547,22 +547,22 @@ function bedroom(s) {           // s = -1 left (bedroom 1), +1 right (bedroom 2)
   artPanel('z', X(0.017), zc - 0.55, zc + 0.55, F + 1.45, F + 2.15, s < 0);
   const lampLight = new THREE.PointLight(0xffb469, 2.6, 5, 2); lampLight.position.set(X(1.25), F + 1.85, zc); scene.add(lampLight);
   // built-in wardrobe on the bathroom-side wall
-  bx(1.9, 2.5, F, CEIL, -2.8, -1.0, M.wood, { uv: 1.3 });
-  for (const zg of [-2.2, -1.6]) bx(1.896, 1.903, F + 0.02, CEIL - 0.02, zg - 0.004, zg + 0.004, M.dark, { cast: false });
-  bx(1.896, 1.903, CEIL - 0.46, CEIL - 0.45, -2.78, -1.02, M.dark, { cast: false });
-  for (const zh of [-2.26, -2.14, -1.54]) bx(1.86, 1.876, F + 0.85, F + 1.75, zh - 0.01, zh + 0.01, M.blackMetal);
-  bx(1.88, 1.9, F + 0.02, CEIL - 0.05, -1.012, -1.0, M.led, { cast: false });
+  bx(1.9, 2.5, F, CEIL, -2.8, -1.15, M.wood, { uv: 1.3 });
+  for (const zg of [-2.25, -1.7]) bx(1.896, 1.903, F + 0.02, CEIL - 0.02, zg - 0.004, zg + 0.004, M.dark, { cast: false });
+  bx(1.896, 1.903, CEIL - 0.46, CEIL - 0.45, -2.78, -1.17, M.dark, { cast: false });
+  for (const zh of [-2.31, -2.19, -1.66]) bx(1.86, 1.876, F + 0.85, F + 1.75, zh - 0.01, zh + 0.01, M.blackMetal);
+  bx(1.88, 1.9, F + 0.02, CEIL - 0.05, -1.162, -1.15, M.led, { cast: false });
   // dressing desk + mirror + chair
-  bx(0.0, 0.46, F + 0.74, F + 0.78, 1.55, 2.62, M.wood);
-  bx(0.02, 0.44, F + 0.6, F + 0.74, 1.6, 2.57, M.wood);
-  bx(0.44, 0.446, F + 0.665, F + 0.672, 1.62, 2.55, M.dark, { cast: false });
-  for (const z of [1.58, 2.59]) bx(0.4, 0.43, F, F + 0.6, z - 0.015, z + 0.015, M.blackMetal);
-  bx(0.0, 0.015, F + 1.03, F + 1.97, 1.76, 2.42, M.blackMetal);
-  mirrors.push([bx(0.0, 0.02, F + 1.05, F + 1.95, 1.78, 2.4, M.mirror), -s]);
-  cyl(0.045, 0.06, 0.2, M.ceramicBeige, X(0.2), F + 0.88, 2.42);
-  bx(0.56, 1.0, F + 0.44, F + 0.52, 1.86, 2.3, M.fabric, { r: 0.03 });
-  bx(0.95, 1.02, F + 0.5, F + 0.95, 1.88, 2.28, M.fabric, { r: 0.03 });
-  for (const u of [0.6, 0.96]) for (const z of [1.9, 2.26]) bx(u - 0.012, u + 0.012, F, F + 0.44, z - 0.012, z + 0.012, M.blackMetal);
+  bx(0.0, 0.46, F + 0.74, F + 0.78, 1.75, 2.62, M.wood);
+  bx(0.02, 0.44, F + 0.6, F + 0.74, 1.8, 2.57, M.wood);
+  bx(0.44, 0.446, F + 0.665, F + 0.672, 1.82, 2.55, M.dark, { cast: false });
+  for (const z of [1.78, 2.59]) bx(0.4, 0.43, F, F + 0.6, z - 0.015, z + 0.015, M.blackMetal);
+  bx(0.0, 0.015, F + 1.03, F + 1.97, 1.9, 2.5, M.blackMetal);
+  mirrors.push([bx(0.0, 0.02, F + 1.05, F + 1.95, 1.92, 2.48, M.mirror), -s]);
+  cyl(0.045, 0.06, 0.2, M.ceramicBeige, X(0.2), F + 0.88, 2.5);
+  bx(0.56, 1.0, F + 0.44, F + 0.52, 1.97, 2.41, M.fabric, { r: 0.03 });
+  bx(0.95, 1.02, F + 0.5, F + 0.95, 1.99, 2.39, M.fabric, { r: 0.03 });
+  for (const u of [0.6, 0.96]) for (const z of [2.01, 2.37]) bx(u - 0.012, u + 0.012, F, F + 0.44, z - 0.012, z + 0.012, M.blackMetal);
   // curtains + pelmet
   curtain(Math.min(X(0.05), X(0.6)), Math.max(X(0.05), X(0.6)), 2.72, F + 0.01, CEIL - 0.12, 4);
   curtain(Math.min(X(1.85), X(2.42)), Math.max(X(1.85), X(2.42)), 2.72, F + 0.01, CEIL - 0.12, 4);
@@ -575,7 +575,7 @@ function bedroom(s) {           // s = -1 left (bedroom 1), +1 right (bedroom 2)
   // ceiling: cove LED line + downlights
   bx(0.05, 2.45, CEIL - 0.13, CEIL - 0.12, 2.6, 2.62, R(M.led), { parent: roof, cast: false });
   bx(0.04, 0.06, CEIL - 0.05, CEIL - 0.03, -2.6, 2.6, R(M.led), { parent: roof, cast: false });
-  bx(2.44, 2.46, CEIL - 0.05, CEIL - 0.03, -0.95, 2.6, R(M.led), { parent: roof, cast: false });
+  bx(2.44, 2.46, CEIL - 0.05, CEIL - 0.03, -1.1, 2.6, R(M.led), { parent: roof, cast: false });
   for (const u of [0.8, 1.6]) for (const z of [-1.9, 1.9]) downlight(X(u), z);
   // key light with shadows
   const sp = new THREE.SpotLight(0xffc98a, 20, 0, 1.2, 0.9, 2);
@@ -760,12 +760,12 @@ const shots = [
     state: (t) => ({ roof: smooth(12.8, 16.0, t), door: 0, labels: smooth(16.6, 17.6, t) * (1 - smooth(26.4, 27.3, t)) }) },
   { name: 'corridor', t0: 28, t1: 32.4, fov: 60, cam: lin(28 - XF, 32.4 + XF, [0, E + 0.05, 5.6, 0, E, 2.0], [0, E, 0.95, 0, F + 1.1, -2.5]),
     state: (t) => ({ roof: 0, door: ease((t - 28.1) / 1.6) * 1.5, labels: 0 }), cap: ['المدخل والممر', 'المساحة 3.50 م²  •  1.40 × 2.50 م', 'باب خشبي 1.00 × 2.40 م'] },
-  { name: 'bed1', t0: 32.4, t1: 37.2, fov: 62, cam: lin(32.4 - XF, 37.2 + XF, [-0.9, E - 0.1, 1.05, -3.3, F + 1.0, 0.1], [-0.9, E - 0.05, -0.55, -3.3, F + 1.05, 0.1]),
-    state: () => ({ roof: 0, door: 0, labels: 0 }), cap: ['غرفة نوم 1', 'المساحة 14.00 م²  •  2.50 × 5.60 م', 'سرير مزدوج • خزانة مدمجة • مكتب تسريحة'] },
+  { name: 'bed1', t0: 32.4, t1: 37.2, fov: 62, cam: lin(32.4 - XF, 37.2 + XF, [-0.9, E - 0.1, 0.95, -3.3, F + 1.0, 0.0], [-0.9, E - 0.05, -0.65, -3.3, F + 1.05, 0.0]),
+    state: () => ({ roof: 0, door: 0, labels: 0 }), cap: ['غرفة نوم 1', 'المساحة 14.00 م²  •  2.50 × 5.60 م', 'سرير 1.80 × 2.00 م • خزانة مدمجة • مكتب تسريحة'] },
   { name: 'bath', t0: 37.2, t1: 41.6, fov: 64, cam: lin(37.2 - XF, 41.6 + XF, [0.02, E, 0.75, 0.3, F + 1.0, -2.6], [0.0, E, -0.15, 0.42, F + 1.05, -2.3]),
     state: () => ({ roof: 0, door: 0, labels: 0 }), cap: ['دورة المياه', 'المساحة 4.20 م²  •  1.40 × 3.00 م', 'دش زجاجي • كرسي معلق • مغسلة بكونتر'] },
   { name: 'bed2', t0: 41.6, t1: 46.0, fov: 62, cam: lin(41.6 - XF, 46.0 + XF, [1.05, E + 0.05, 2.45, 2.4, F + 0.9, -0.9], [1.15, E, 2.2, 2.9, F + 0.9, 0.0]),
-    state: () => ({ roof: 0, door: 0, labels: 0 }), cap: ['غرفة نوم 2', 'المساحة 14.00 م²  •  2.50 × 5.60 م', 'إضاءة مخفية LED • سبوت • أباجورات'] },
+    state: () => ({ roof: 0, door: 0, labels: 0 }), cap: ['غرفة نوم 2', 'المساحة 14.00 م²  •  2.50 × 5.60 م', 'سرير 1.80 × 2.00 م • إضاءة مخفية LED • سبوت'] },
   { name: 'final', t0: 46.0, t1: DURATION, fov: 50, cam: lin(46.0 - XF, DURATION, [-5.2, 1.75, 8.6, 0.1, 1.75, 2.2], [-9.8, 3.9, 15.8, 0.6, 1.9, 1.4]),
     state: () => ({ roof: 0, door: 0, labels: 0 }) },
 ];
