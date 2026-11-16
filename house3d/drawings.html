@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<title>غرف الشيوخ — المخططات التنفيذية</title>
+<style>
+  @font-face { font-family: 'Cairo'; src: url(fonts/cairo-arabic.woff2) format('woff2'); font-weight: 200 1000;
+    unicode-range: U+0600-06FF, U+0750-077F, U+FB50-FDFF, U+FE70-FEFF, U+200C-200F; }
+  @font-face { font-family: 'Cairo'; src: url(fonts/cairo-latin.woff2) format('woff2'); font-weight: 200 1000;
+    unicode-range: U+0000-00FF, U+2000-206F, U+2212; }
+  @page { size: 1920px 1080px; margin: 0; }
+  html, body { margin: 0; background: #77736c; font-family: Cairo, sans-serif; color: #1f1b16; }
+  .sheet { width: 1920px; height: 1080px; position: relative; background: #f7f2e8; overflow: hidden; margin: 0 auto 24px;
+    break-after: page; page-break-after: always; }
+  @media print { html, body { background: none; } .sheet { margin: 0; } }
+  .frame { position: absolute; inset: 16px; border: 2.5px solid #1f1b16; pointer-events: none; }
+  svg.draw { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; }
+  svg text { font-family: Cairo, sans-serif; }
+  .tb { position: absolute; left: 16px; top: 16px; bottom: 16px; width: 404px; border-right: 2.5px solid #1f1b16; background: #efe7d6;
+    display: flex; flex-direction: column; box-sizing: border-box; }
+  .tb .proj { background: #2b2622; color: #f7ecd8; padding: 18px 22px 16px; }
+  .tb .proj h1 { margin: 0; font-size: 40px; line-height: 1.2; font-weight: 800; }
+  .tb .proj p { margin: 2px 0 0; font-size: 19px; color: #d9b98a; font-weight: 600; }
+  .tb .ttl { padding: 14px 22px 12px; border-bottom: 2px solid #1f1b16; }
+  .tb .ttl small { display: block; font-size: 15px; color: #8a4b12; font-weight: 700; }
+  .tb .ttl b { font-size: 27px; font-weight: 800; line-height: 1.3; }
+  .tb .body { padding: 12px 22px; flex: 1; font-size: 16.5px; line-height: 1.55; overflow: hidden; }
+  .tb .body h3 { margin: 10px 0 4px; font-size: 17px; color: #8a4b12; font-weight: 800; }
+  .tb .body h3:first-child { margin-top: 0; }
+  .tb .body ul { margin: 0; padding: 0 18px 0 0; }
+  .tb .body li { margin: 1px 0; }
+  .tb .kv { display: grid; grid-template-columns: auto auto; gap: 1px 10px; }
+  .tb .kv span:nth-child(even) { text-align: left; font-weight: 800; direction: ltr; }
+  .tb .foot { border-top: 2px solid #1f1b16; padding: 9px 22px; font-size: 14.5px; display: flex; justify-content: space-between; font-weight: 700; }
+  .lg { display: flex; align-items: center; gap: 9px; margin: 3px 0; }
+  .lg svg { flex: none; }
+  .content { position: absolute; left: 420px; right: 16px; top: 16px; bottom: 16px; padding: 24px 40px; box-sizing: border-box; }
+  .content h2 { margin: 0 0 8px; font-size: 25px; font-weight: 800; }
+  .content h2:not(:first-child) { margin-top: 18px; }
+  table { border-collapse: collapse; width: 100%; font-size: 17.5px; }
+  th { background: #2b2622; color: #f7ecd8; font-weight: 700; padding: 6px 10px; border: 1.5px solid #1f1b16; }
+  td { padding: 5px 10px; border: 1.5px solid #1f1b16; background: #fffdf8; vertical-align: middle; }
+  td.c, th.c { text-align: center; }
+  td.n { text-align: center; font-weight: 800; direction: ltr; white-space: nowrap; }
+  td.tag { text-align: center; font-weight: 800; font-size: 20px; color: #8a4b12; }
+  .sw { display: inline-block; width: 34px; height: 22px; border: 1.5px solid #1f1b16; vertical-align: middle; margin-left: 8px; }
+  .notes { font-size: 19px; line-height: 1.75; }
+  .notes li { margin: 3px 0; }
+  .warn { background: #fff3d6; border: 2px solid #b8791c; padding: 12px 18px; font-size: 19px; line-height: 1.7; margin-top: 14px; }
+  .two { display: grid; grid-template-columns: 1fr 1fr; gap: 26px; }
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script src="drawings.js"></script>
+</body>
+</html>
