@@ -1,0 +1,12 @@
+{
+  "name": "house3d",
+  "private": true,
+  "description": "3D model and video tour of the 2-bedroom + bathroom design (7.00 x 6.00 m)",
+  "scripts": {
+    "render": "node render.js --out tour.mp4",
+    "stills": "node render.js --stills 3,9,21,35,40,44,50"
+  },
+  "dependencies": {
+    "three": "0.170.0"
+  }
+}

@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>تصميم ثلاثي الأبعاد</title>
+<style>
+  @font-face { font-family: 'Cairo'; src: url(fonts/cairo-arabic.woff2) format('woff2'); font-weight: 200 1000;
+    unicode-range: U+0600-06FF, U+0750-077F, U+FB50-FDFF, U+FE70-FEFF, U+200C-200F; }
+  @font-face { font-family: 'Cairo'; src: url(fonts/cairo-latin.woff2) format('woff2'); font-weight: 200 1000;
+    unicode-range: U+0000-00FF, U+2000-206F, U+2212; }
+  html, body { margin: 0; height: 100%; background: #000; overflow: hidden; font-family: Cairo, sans-serif; }
+  #out { position: absolute; inset: 0; width: 100vw; height: 100vh; object-fit: contain; display: block; }
+  #ui { position: absolute; top: 12px; right: 12px; display: flex; gap: 8px; flex-wrap: wrap; z-index: 2; }
+  #ui button { font-family: inherit; font-size: 15px; padding: 6px 14px; border-radius: 8px; border: 1px solid #c9a36a;
+    background: rgba(20, 16, 12, .7); color: #f3e7d3; cursor: pointer; }
+  #ui button.on { background: #c9a36a; color: #1b140d; }
+  body.render #ui { display: none; }
+</style>
+<script type="importmap">
+{ "imports": {
+  "three": "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js",
+  "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"
+} }
+</script>
+</head>
+<body>
+<canvas id="out"></canvas>
+<div id="ui">
+  <button id="bTour" class="on">الجولة</button>
+  <button id="bOrbit">تجوّل حر</button>
+  <button id="bRoof">إخفاء السقف</button>
+</div>
+<script type="module" src="scene.js"></script>
+</body>
+</html>
