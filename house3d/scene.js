@@ -738,6 +738,12 @@ function track(keys) {     // Hermite spline through [t, px,py,pz, tx,ty,tz] key
   };
 }
 const lin = (t0, t1, a, b) => (t) => { const u = ease((t - t0) / (t1 - t0)); return a.map((v, i) => v + (b[i] - v) * u); };
+const AREAS = [   // clear interior areas as modelled
+  ['غرفة نوم 1', '2.50 × 5.60 م', '14.00 م²'],
+  ['غرفة نوم 2', '2.50 × 5.60 م', '14.00 م²'],
+  ['دورة المياه', '1.40 × 3.00 م', '4.20 م²'],
+  ['الممر', '1.40 × 2.50 م', '3.50 م²'],
+];
 const XF = 0.45;   // half cross-fade
 const E = F + 1.5; // eye height inside
 const shots = [
@@ -753,13 +759,13 @@ const shots = [
       [28.45, -6.8, 8.6, -7.0, 0.0, 0.5, 0.0]]),
     state: (t) => ({ roof: smooth(12.8, 16.0, t), door: 0, labels: smooth(16.6, 17.6, t) * (1 - smooth(26.4, 27.3, t)) }) },
   { name: 'corridor', t0: 28, t1: 32.4, fov: 60, cam: lin(28 - XF, 32.4 + XF, [0, E + 0.05, 5.6, 0, E, 2.0], [0, E, 0.95, 0, F + 1.1, -2.5]),
-    state: (t) => ({ roof: 0, door: ease((t - 28.1) / 1.6) * 1.5, labels: 0 }), cap: ['المدخل والممر', 'باب خشبي 1.00 × 2.40 م'] },
+    state: (t) => ({ roof: 0, door: ease((t - 28.1) / 1.6) * 1.5, labels: 0 }), cap: ['المدخل والممر', 'المساحة 3.50 م²  •  1.40 × 2.50 م', 'باب خشبي 1.00 × 2.40 م'] },
   { name: 'bed1', t0: 32.4, t1: 37.2, fov: 62, cam: lin(32.4 - XF, 37.2 + XF, [-0.9, E - 0.1, 1.05, -3.3, F + 1.0, 0.1], [-0.9, E - 0.05, -0.55, -3.3, F + 1.05, 0.1]),
-    state: () => ({ roof: 0, door: 0, labels: 0 }), cap: ['غرفة نوم 1', 'سرير مزدوج • خزانة مدمجة • مكتب تسريحة'] },
+    state: () => ({ roof: 0, door: 0, labels: 0 }), cap: ['غرفة نوم 1', 'المساحة 14.00 م²  •  2.50 × 5.60 م', 'سرير مزدوج • خزانة مدمجة • مكتب تسريحة'] },
   { name: 'bath', t0: 37.2, t1: 41.6, fov: 64, cam: lin(37.2 - XF, 41.6 + XF, [0.02, E, 0.75, 0.3, F + 1.0, -2.6], [0.0, E, -0.15, 0.42, F + 1.05, -2.3]),
-    state: () => ({ roof: 0, door: 0, labels: 0 }), cap: ['دورة المياه', 'دش زجاجي • كرسي معلق • مغسلة بكونتر'] },
+    state: () => ({ roof: 0, door: 0, labels: 0 }), cap: ['دورة المياه', 'المساحة 4.20 م²  •  1.40 × 3.00 م', 'دش زجاجي • كرسي معلق • مغسلة بكونتر'] },
   { name: 'bed2', t0: 41.6, t1: 46.0, fov: 62, cam: lin(41.6 - XF, 46.0 + XF, [1.05, E + 0.05, 2.45, 2.4, F + 0.9, -0.9], [1.15, E, 2.2, 2.9, F + 0.9, 0.0]),
-    state: () => ({ roof: 0, door: 0, labels: 0 }), cap: ['غرفة نوم 2', 'إضاءة مخفية LED • سبوت • أباجورات'] },
+    state: () => ({ roof: 0, door: 0, labels: 0 }), cap: ['غرفة نوم 2', 'المساحة 14.00 م²  •  2.50 × 5.60 م', 'إضاءة مخفية LED • سبوت • أباجورات'] },
   { name: 'final', t0: 46.0, t1: DURATION, fov: 50, cam: lin(46.0 - XF, DURATION, [-5.2, 1.75, 8.6, 0.1, 1.75, 2.2], [-9.8, 3.9, 15.8, 0.6, 1.9, 1.4]),
     state: () => ({ roof: 0, door: 0, labels: 0 }) },
 ];
@@ -789,17 +795,19 @@ const ctx = out.getContext('2d');
 const K = H / 720;
 const GOLD = '#d4ae74';
 function rrect(x, y, w, h, r) { ctx.beginPath(); ctx.roundRect(x, y, w, h, r); }
-function caption(title, sub, a) {
+function caption(title, sub, a, sub2) {
   if (a <= 0.001) return;
   ctx.save(); ctx.globalAlpha = a; ctx.direction = 'rtl';
   ctx.font = `700 ${30 * K}px Cairo`; const tw = ctx.measureText(title).width;
-  ctx.font = `400 ${18 * K}px Cairo`; const sw = sub ? ctx.measureText(sub).width : 0;
-  const bw = Math.max(tw, sw) + 64 * K, bh = (sub ? 98 : 66) * K, x1 = W - 46 * K + (1 - a) * 24 * K, x0 = x1 - bw, y0 = H - 54 * K - bh;
+  ctx.font = `700 ${19 * K}px Cairo`; const sw = sub ? ctx.measureText(sub).width : 0;
+  ctx.font = `400 ${16 * K}px Cairo`; const sw2 = sub2 ? ctx.measureText(sub2).width : 0;
+  const bw = Math.max(tw, sw, sw2) + 64 * K, bh = (sub ? (sub2 ? 126 : 98) : 66) * K, x1 = W - 46 * K + (1 - a) * 24 * K, x0 = x1 - bw, y0 = H - 54 * K - bh;
   ctx.fillStyle = 'rgba(18,14,10,0.62)'; rrect(x0, y0, bw, bh, 10 * K); ctx.fill();
   ctx.fillStyle = GOLD; ctx.fillRect(x1 - 6 * K, y0 + 14 * K, 4 * K, bh - 28 * K);
   ctx.textAlign = 'right'; ctx.fillStyle = '#fbf3e6'; ctx.font = `700 ${30 * K}px Cairo`;
   ctx.fillText(title, x1 - 26 * K, y0 + 44 * K);
-  if (sub) { ctx.fillStyle = '#e2cfae'; ctx.font = `400 ${18 * K}px Cairo`; ctx.fillText(sub, x1 - 26 * K, y0 + 78 * K); }
+  if (sub) { ctx.fillStyle = sub2 ? GOLD : '#e2cfae'; ctx.font = `${sub2 ? 700 : 400} ${19 * K}px Cairo`; ctx.fillText(sub, x1 - 26 * K, y0 + 78 * K); }
+  if (sub2) { ctx.fillStyle = '#d8c7aa'; ctx.font = `400 ${16 * K}px Cairo`; ctx.fillText(sub2, x1 - 26 * K, y0 + 106 * K); }
   ctx.restore();
 }
 function titleCard(a) {
@@ -822,7 +830,9 @@ function endCard(a) {
   ctx.fillStyle = '#fbf3e6'; ctx.font = `700 ${56 * K}px Cairo`; ctx.fillText('تصميم تفصيلي', W / 2, 100 * K);
   ctx.fillStyle = GOLD; ctx.fillRect(W / 2 - 60 * K, 120 * K, 120 * K, 3 * K);
   ctx.fillStyle = '#efe0c6'; ctx.font = `400 ${28 * K}px Cairo`; ctx.fillText('غرفتين نوم + دورة مياه', W / 2, 164 * K);
-  const items = [['الطول', '7.00 م'], ['العرض', '6.00 م'], ['المساحة', '42.00 م²'], ['ارتفاع السقف', '3.00 م']];
+  ctx.fillStyle = '#e6d3b2'; ctx.font = `700 ${20 * K}px Cairo`;
+  ctx.fillText(AREAS.map(([n, , a]) => `${n}: ${a}`).join('   •   '), W / 2, 210 * K);
+  const items = [['الطول', '7.00 م'], ['العرض', '6.00 م'], ['المساحة الإجمالية', '42.00 م²'], ['ارتفاع السقف', '3.00 م']];
   const bw = 190 * K, gap = 16 * K, total = items.length * bw + (items.length - 1) * gap, y = H - 140 * K;
   items.forEach(([k, v], i) => {
     const x = W / 2 + total / 2 - bw - i * (bw + gap);
@@ -835,16 +845,45 @@ function endCard(a) {
 }
 const _v = new THREE.Vector3();
 function project(x, y, z) { _v.set(x, y, z).project(camera); return [(_v.x * 0.5 + 0.5) * W, (-_v.y * 0.5 + 0.5) * H, _v.z]; }
+function areaTable(a) {
+  if (a <= 0.001) return;
+  ctx.save(); ctx.globalAlpha = a; ctx.direction = 'rtl';
+  const pw = 330 * K, rowH = 34 * K, x0 = 40 * K - (1 - a) * 24 * K, x1 = x0 + pw, y0 = 40 * K;
+  const rows = AREAS.length, ph = 62 * K + rows * rowH + 92 * K;
+  ctx.fillStyle = 'rgba(18,14,10,0.7)'; rrect(x0, y0, pw, ph, 12 * K); ctx.fill();
+  ctx.fillStyle = GOLD; ctx.fillRect(x1 - 6 * K, y0 + 14 * K, 4 * K, ph - 28 * K);
+  ctx.textAlign = 'right'; ctx.fillStyle = '#fbf3e6'; ctx.font = `700 ${23 * K}px Cairo`;
+  ctx.fillText('جدول المساحات', x1 - 24 * K, y0 + 38 * K);
+  let y = y0 + 62 * K;
+  for (const [name, dims, area] of AREAS) {
+    ctx.textAlign = 'right'; ctx.fillStyle = '#efe3cf'; ctx.font = `700 ${17 * K}px Cairo`; ctx.fillText(name, x1 - 24 * K, y + 22 * K);
+    ctx.textAlign = 'center'; ctx.fillStyle = '#b9a88c'; ctx.font = `400 ${14 * K}px Cairo`; ctx.fillText(dims, x0 + pw * 0.47, y + 21 * K);
+    ctx.textAlign = 'left'; ctx.fillStyle = GOLD; ctx.font = `700 ${17 * K}px Cairo`; ctx.fillText(area, x0 + 18 * K, y + 22 * K);
+    ctx.fillStyle = 'rgba(212,174,116,0.18)'; ctx.fillRect(x0 + 18 * K, y + rowH - 1, pw - 48 * K, 1);
+    y += rowH;
+  }
+  y += 10 * K;
+  for (const [name, area, big] of [['المساحة الصافية للغرف', '35.70 م²', false], ['المساحة الإجمالية للمبنى', '42.00 م²', true]]) {
+    ctx.textAlign = 'right'; ctx.fillStyle = big ? '#fbf3e6' : '#d8c7aa'; ctx.font = `700 ${(big ? 17 : 15) * K}px Cairo`; ctx.fillText(name, x1 - 24 * K, y + 22 * K);
+    ctx.textAlign = 'left'; ctx.fillStyle = big ? '#fbf3e6' : GOLD; ctx.font = `700 ${(big ? 19 : 16) * K}px Cairo`; ctx.fillText(area, x0 + 18 * K, y + 22 * K);
+    y += 36 * K;
+  }
+  ctx.restore();
+}
 let dimsAlpha = 0;
 function planLabels(a) {
   if (a <= 0.001) return;
   ctx.save(); ctx.globalAlpha = a; ctx.direction = 'rtl'; ctx.textAlign = 'center';
-  const labels = [['غرفة نوم 1', -2.05, 2.05], ['دورة مياه', 0, -1.1], ['ممر', 0, 1.6], ['غرفة نوم 2', 2.05, 2.05]];
-  for (const [txt, x, z] of labels) {
+  const labels = [['غرفة نوم 1', '14.00 م²', -2.05, 2.05], ['دورة مياه', '4.20 م²', 0, -1.1], ['ممر', '3.50 م²', 0, 1.6], ['غرفة نوم 2', '14.00 م²', 2.05, 2.05]];
+  for (const [txt, area, x, z] of labels) {
     const [sx, sy, sz] = project(x, CEIL + 0.25, z); if (sz > 1) continue;
-    ctx.font = `700 ${(txt === 'ممر' ? 15 : 19) * K}px Cairo`; const w = ctx.measureText(txt).width + 26 * K, h = 34 * K;
-    ctx.fillStyle = 'rgba(18,14,10,0.72)'; rrect(sx - w / 2, sy - h / 2, w, h, h / 2); ctx.fill();
-    ctx.fillStyle = '#fbf3e6'; ctx.fillText(txt, sx, sy + 7 * K);
+    const small = txt === 'ممر', f1 = (small ? 15 : 19) * K, f2 = (small ? 14 : 17) * K;
+    ctx.font = `700 ${f1}px Cairo`; const w1 = ctx.measureText(txt).width;
+    ctx.font = `700 ${f2}px Cairo`; const w2 = ctx.measureText(area).width;
+    const w = Math.max(w1, w2) + 28 * K, h = (small ? 50 : 58) * K;
+    ctx.fillStyle = 'rgba(18,14,10,0.76)'; rrect(sx - w / 2, sy - h / 2, w, h, 14 * K); ctx.fill();
+    ctx.fillStyle = '#fbf3e6'; ctx.font = `700 ${f1}px Cairo`; ctx.fillText(txt, sx, sy - (small ? 3 : 4) * K);
+    ctx.fillStyle = GOLD; ctx.font = `700 ${f2}px Cairo`; ctx.fillText(area, sx, sy + (small ? 17 : 20) * K);
   }
   const dim = (p0, p1, txt) => {
     const a0 = project(...p0), a1 = project(...p1); if (a0[2] > 1 || a1[2] > 1) return;
@@ -865,10 +904,11 @@ function overlays(t, shot, w) {
     titleCard(w * smooth(0.6, 1.6, t) * (1 - smooth(5.2, 6.2, t)));
     caption('الواجهة الأمامية', 'إضاءة جدارية دافئة • واجهات زجاجية • خشب شرائح', w * smooth(7.2, 7.8, t) * (1 - smooth(12.2, 12.8, t)));
     dimsAlpha = 1 - smooth(22.6, 23.4, t);
+    areaTable(w * smooth(17.4, 18.2, t) * (1 - smooth(26.4, 27.1, t)));
     planLabels(w * shot.state(t).labels);
     caption('المسقط ثلاثي الأبعاد', '7.00 × 6.00 م  •  المساحة 42 م²', w * smooth(17.0, 17.6, t) * (1 - smooth(26.2, 26.8, t)));
   } else if (shot.cap) {
-    caption(shot.cap[0], shot.cap[1], w * smooth(shot.t0 + 0.4, shot.t0 + 0.9, t) * (1 - smooth(shot.t1 - 0.7, shot.t1 - 0.25, t)));
+    caption(shot.cap[0], shot.cap[1], w * smooth(shot.t0 + 0.4, shot.t0 + 0.9, t) * (1 - smooth(shot.t1 - 0.7, shot.t1 - 0.25, t)), shot.cap[2]);
   } else if (shot.name === 'final') {
     endCard(w * smooth(47.4, 48.6, t));
   }
