@@ -1,4 +1,4 @@
-// 3D model + cinematic tour of the outdoor lounge pergola, winter mode (8.00 x 3.00 m, 3.00 m high, on a 0.60 m platform).
+// 3D model + cinematic tour of the outdoor lounge pergola, winter mode (6.00 x 5.00 m, 3.00 m high, on a 0.60 m platform).
 // Open index.html for a live tour / free orbit, or index.html?render=1 for frame capture (see render.js).
 import * as THREE from 'three';
 import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
