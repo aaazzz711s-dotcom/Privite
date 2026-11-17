@@ -1,6 +1,7 @@
 // Renders the tour to MP4 with headless Chromium (Playwright) + ffmpeg.
 //   node render.js --stills 2,10,20 [--w 1280 --h 720]          -> PNG stills in ./stills
-//   node render.js --out tour.mp4 [--from 0 --to 52 --fps 30]     -> H.264 video
+//   node render.js --out tour.mp4 [--from 0 --to 44 --fps 30]     -> H.264 video
+//   node render.js --q 'tvopt=projector&clip=1' --out clip.mp4    -> screen-only clip for a TV option
 const { chromium } = require('playwright');
 const { spawn } = require('child_process');
 const http = require('http'), fs = require('fs'), path = require('path');
@@ -28,7 +29,7 @@ const server = http.createServer((req, res) => {
     const rel = route.request().url().split('three@0.170.0/')[1];
     route.fulfill({ path: path.join(THREE_DIR, rel), contentType: 'text/javascript' });
   });
-  await page.goto(`http://localhost:${port}/index.html?render=1&w=${W}&h=${H}`);
+  await page.goto(`http://localhost:${port}/index.html?render=1&w=${W}&h=${H}${arg('q') ? '&' + arg('q') : ''}`);
   await page.waitForFunction(() => window.__ready === true, null, { timeout: 300000 });
   const DURATION = await page.evaluate(() => window.DURATION);
 

@@ -1,7 +1,7 @@
 
 // ---------------------------------------------------------------- tour timeline
 const XF = 0.45, E = Y0 + 1.5;
-const shots = [
+const tourShots = [
   { name: 'ext', t0: 0, t1: 24, fov: 50, cam: track([
       [0, -5.4, 1.5, 12.8, -0.3, 1.9, 1.0],
       [4.2, -3.6, 1.7, 9.8, -0.4, 1.95, 1.0],
@@ -21,6 +21,24 @@ const shots = [
   { name: 'final', t0: 38.6, t1: DURATION, fov: 50, cam: lin(38.6 - XF, DURATION, [-3.4, 1.9, 9.4, -0.2, 1.9, 0.6], [-4.6, 3.5, 13.6, 0, 1.8, 0.3]),
     state: () => ({ louver: 0, labels: 0, tv: 0 }) },
 ];
+const CLIPTXT = {
+  projector: { title: 'بروجكتر وشاشة تنزل من السقف', closed: ['مسكّر: الشاشة ملفوفة داخل الكمرة الأمامية', 'الواجهة مفتوحة بالكامل على الحديقة'],
+    open: ['الشاشة تنزل بالريموت', 'شاشة 110 بوصة • البروجكتر يشتغل معها'], detail: ['البروجكتر مخفي فوق الكنب', 'مثبّت تحت الكمرة الخلفية', 'المروحة على الجنب عشان ما تقطع الصورة'],
+    card: 'شاشة 110 بوصة   •   تنزل بالريموت   •   الواجهة مفتوحة وهي مسكّرة' },
+  drop: { title: 'تلفزيون ينزل من السقف', closed: ['مسكّر: التلفزيون مطبّق تحت السقف', 'الواجهة والأرض فاضية'],
+    open: ['ينفتح وينزل بالريموت', 'ينزل 0.55 م بعد ما ينفتح • شاشة 65 بوصة'], detail: ['قاعدة مثبتة في الكمرة الوسطى', 'محرك كهربائي داخل العلبة', 'يشتغل بالليل والنهار'],
+    card: 'شاشة 65 بوصة   •   ينفتح وينزل بالريموت   •   الأرض فاضية' },
+};
+const CT = CLIPTXT[TVOPT] || CLIPTXT.projector;
+const clipShots = [
+  { name: 'clipMain', t0: 0, t1: 11, fov: 62, cam: lin(0, 11 + XF, [0.7, Y0 + 1.27, -1.8, 0, Y0 + 1.5, 2.4], [0.3, Y0 + 1.2, -1.3, 0, Y0 + 1.55, 2.4]),
+    state: (t) => ({ louver: 0, labels: 0, tv: clamp((t - 5.0) / 3.8) }) },
+  { name: 'clipDetail', t0: 11, t1: DURATION, fov: 62, cam: TVOPT === 'drop'
+      ? lin(11 - XF, DURATION, [2.2, Y0 + 1.25, -0.35, 0, Y0 + 2.05, 1.25], [1.85, Y0 + 1.35, -0.05, 0, Y0 + 2.1, 1.25])
+      : lin(11 - XF, DURATION, [2.45, Y0 + 1.45, 0.0, -0.6, Y0 + 1.95, 0.4], [2.35, Y0 + 1.55, 0.45, -0.6, Y0 + 2.0, 0.3]),
+    state: () => ({ louver: 0, labels: 0, tv: 1 }) },
+];
+const shots = CLIP ? clipShots : tourShots;
 
 let lastStateKey = '';
 function applyState(st, t) {
@@ -97,8 +115,24 @@ function planLabels(a) {
   dim([-X1, 0.05, PZ + 2.0], [X1, 0.05, PZ + 2.0], '6.00 م'); dim([X1 + 1.3, 0.05, -Z1], [X1 + 1.3, 0.05, Z1], '5.00 م');
   ctx.restore();
 }
+function clipCard(a) {
+  if (a <= 0.001) return;
+  ctx.save(); ctx.globalAlpha = a; ctx.direction = 'rtl'; ctx.textAlign = 'center';
+  const gr = ctx.createLinearGradient(0, 0, 0, H * 0.42); gr.addColorStop(0, 'rgba(0,0,0,0.65)'); gr.addColorStop(1, 'rgba(0,0,0,0)');
+  ctx.fillStyle = gr; ctx.fillRect(0, 0, W, H * 0.42);
+  ctx.fillStyle = '#fbf3e6'; ctx.font = `700 ${50 * K}px Cairo`; ctx.fillText(CT.title, W / 2, 92 * K);
+  ctx.fillStyle = GOLD; ctx.fillRect(W / 2 - 60 * K, 112 * K, 120 * K, 3 * K);
+  ctx.fillStyle = '#e6d3b2'; ctx.font = `700 ${21 * K}px Cairo`; ctx.fillText(CT.card, W / 2, 156 * K);
+  ctx.restore();
+}
 function overlays(t, shot, w) {
-  if (shot.name === 'ext') {
+  if (shot.name === 'clipMain') {
+    caption(CT.title, CT.closed[0], w * smooth(0.6, 1.2, t) * (1 - smooth(4.4, 4.9, t)), CT.closed[1]);
+    caption(CT.title, CT.open[0], w * smooth(5.4, 6.0, t) * (1 - smooth(10.2, 10.7, t)), CT.open[1]);
+  } else if (shot.name === 'clipDetail') {
+    caption(CT.detail[0], CT.detail[1], w * smooth(11.5, 12.0, t) * (1 - smooth(13.3, 13.8, t)), CT.detail[2]);
+    clipCard(w * smooth(13.8, 14.6, t));
+  } else if (shot.name === 'ext') {
     titleCard(w * smooth(0.6, 1.6, t) * (1 - smooth(5.2, 6.2, t)));
     caption('الواجهة', 'إطار ألمنيوم أسود • زجاج سحاب', w * smooth(7.6, 8.2, t) * (1 - smooth(12.8, 13.4, t)), 'إضاءة LED مخفية تحت المصطبة والدرج');
     planLabels(w * shot.state(t).labels);
