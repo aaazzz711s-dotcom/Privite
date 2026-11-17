@@ -3,7 +3,7 @@
 await document.fonts.load(`700 30px Cairo`, 'تصميم 8.00');
 await document.fonts.load(`400 30px Cairo`, 'تصميم 8.00');
 renderer.compile(scene, camera);
-for (const t of [2, 12, 18, 26, 30, 34, 40]) frame(t);
+for (const t of [2, 12, 18, 26, 29, 33, 36, 42]) frame(t);
 window.__ready = true;
 
 if (!RENDER) {

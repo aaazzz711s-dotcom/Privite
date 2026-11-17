@@ -14,7 +14,7 @@ import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
 const params = new URLSearchParams(location.search);
 const RENDER = params.has('render');
 const W = +(params.get('w') || 1280), H = +(params.get('h') || 720);
-export const DURATION = 42;
+export const DURATION = 44;
 window.DURATION = DURATION;
 if (RENDER) document.body.classList.add('render');
 

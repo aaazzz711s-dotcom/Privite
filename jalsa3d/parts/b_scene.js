@@ -64,6 +64,19 @@ function wallWashDown(x0, x1, yTop, yBot, z, k = 0.8) {
   // low planter wall on the right with shrubs
   boxMM(6.4, 6.8, 0, 0.9, -4.4, 6.5, MX.stoneBeige, { uv: 2 });
   for (const z of [-2.6, 0.2, 3.0]) shrub(5.95, z, 0.5, 420, [0.27, 0.5, 0.24]);
+  // front garden: lawn, stepping stones, trees with up-lights
+  {
+    const lawn = new THREE.Mesh(new THREE.PlaneGeometry(15, 13.6), std({ map: cloneTex(grassTex, 10, 9), roughness: 1 }));
+    lawn.rotation.x = -Math.PI / 2; lawn.position.set(-0.6, 0.004, 11.4); lawn.receiveShadow = true; scene.add(lawn);
+    for (let z = 4.75; z < 9.6; z += 0.78) boxMM(-2.15, -1.25, -0.01, 0.025, z, z + 0.55, M.stone, { cast: false, uv: 0 });
+    for (const [x, z, h, sp, n, hsl] of [[-7.5, 7.0, 4.4, 1.4, 2600, [0.25, 0.44, 0.24]], [2.9, 11.2, 4.8, 1.5, 2800, [0.27, 0.42, 0.22]], [-1.2, 15.2, 5.2, 1.7, 2600, [0.24, 0.4, 0.22]], [6.4, 15.0, 4.6, 1.5, 2200, [0.26, 0.42, 0.24]]]) {
+      tree(x, z, h, sp, n, hsl);
+      glowSprite(x + 0.3, 0.06, z + 0.3, 0.6, 0xffc27a, 1.1); groundGlow(x + 0.3, 0.02, z + 0.3, 1.8, 0xffb766, 0.45);
+    }
+    for (const [x, z] of [[-1.2, 15.2], [2.9, 11.2]]) { const tl = new THREE.SpotLight(0xffcf96, 16, 10, 0.6, 0.7, 2); tl.position.set(x + 0.45, 0.1, z + 0.5); tl.target.position.set(x, 3.3, z); scene.add(tl, tl.target); }
+    for (const [x, z, r] of [[-6.2, 6.0, 0.55], [0.9, 7.4, 0.4], [4.8, 6.6, 0.5], [-3.2, 13.0, 0.5], [1.8, 14.2, 0.45]]) shrub(x, z, r, 360, [0.27, 0.52, 0.25]);
+    for (const z of [5.4, 7.0, 8.6]) for (const sx of [-2.45, -0.95]) { cyl(0.04, 0.04, 0.4, M.charcoal, sx, 0.2, z, { seg: 10 }); cyl(0.035, 0.035, 0.03, M.ledHot, sx, 0.39, z, { seg: 10, cast: false }); groundGlow(sx, 0.02, z, 1.2, 0xffb766, 0.5); }
+  }
   // distant silhouettes + stars
   const sil = new THREE.MeshLambertMaterial({ color: 0x0b120d });
   for (let i = 0; i < 40; i++) { const a = i / 40 * Math.PI * 2 + rr(-0.05, 0.05), d = rr(24, 34), h = rr(5, 10);
@@ -167,7 +180,9 @@ function glassPanel(axis, c, a0, a1, y0, y1) {
   B(a0 + f, a1 - f, y0 + f, y1 - f, M.glass, { cast: false, receive: false }, 0.005);
 }
 const GX0 = -X1 + 0.14, GX1 = X1 - 0.14, GP = (GX1 - GX0) / 5;        // five front panels of 1.14 m
-const TVZ = Z1 - 0.55;                                                // inner face of the TV wall
+const TVZ = Z1 - 0.65;                                                // front face (sofa side) of the TV-lift cabinet
+const TVLZ = TVZ + 0.2, TV_DOWN = Y0 + 0.46, TV_UP = Y0 + 1.4;        // TV plane and its centre height when hidden / raised
+const tvLift = new THREE.Group(); scene.add(tvLift);
 {
   const ZG = Z1 - 0.07;
   boxMM(GX0, GX1, YB - 0.05, YB, ZG - 0.06, ZG + 0.03, M.alu, { cast: false }); boxMM(GX0, GX1, Y0, Y0 + 0.012, ZG - 0.06, ZG + 0.03, M.alu, { cast: false });   // tracks
@@ -195,15 +210,15 @@ const TVZ = Z1 - 0.55;                                                // inner f
     boxMM(-X1 + 0.09, -X1 + 0.15, SY + 0.14, SY + 0.146, z - 0.03, z + 0.03, M.ledHot, { cast: false }); boxMM(-X1 + 0.09, -X1 + 0.15, SY - 0.146, SY - 0.14, z - 0.03, z + 0.03, M.ledHot, { cast: false });
     const w = new THREE.Mesh(new THREE.PlaneGeometry(1.1, ph), wm()); w.rotation.y = Math.PI / 2; w.position.set(-X1 + 0.086, (Y0 + YB) / 2, z); scene.add(w);
   }
-  // free-standing slat TV wall at the front, facing the sofa (2.20 m wide, 2.30 m high)
-  const TW = 1.1, TH = Y0 + 2.3;
-  boxMM(-TW, TW, Y0, TH, TVZ + 0.025, TVZ + 0.095, M.dark);
-  slats('x', -TW, TW, TVZ, TVZ + 0.025, () => [Y0, TH], M.slat, 0.08, 0.055);
-  slats('x', -TW, TW, TVZ + 0.095, TVZ + 0.12, () => [Y0, TH], M.slat, 0.08, 0.055);
-  boxMM(-TW - 0.02, TW + 0.02, TH, TH + 0.04, TVZ - 0.01, TVZ + 0.13, M.alu);
-  for (const s of [-1, 1]) boxMM(s * TW - 0.008, s * TW + 0.008, Y0 + 0.05, TH - 0.05, TVZ - 0.01, TVZ, glowMat(0xffc27a, 2.0), { cast: false });
-  boxMM(-0.9, 0.9, Y0 + 0.42, Y0 + 0.47, TVZ - 0.3, TVZ, M.wood);                                   // floating shelf
-  boxMM(-0.88, 0.88, Y0 + 0.412, Y0 + 0.42, TVZ - 0.28, TVZ - 0.02, M.led, { cast: false });
+  // TV-lift cabinet in front of the glass (1.80 x 0.45 x 0.90 m); the 65" TV rises out of it
+  const CW = 0.9, CZ0 = TVZ, CZ1 = TVZ + 0.45, CH = Y0 + 0.9;
+  boxMM(-CW + 0.04, CW - 0.04, Y0, Y0 + 0.08, CZ0 + 0.04, CZ1 - 0.02, M.dark);
+  boxMM(-CW, CW, Y0 + 0.08, CH - 0.03, CZ0, CZ1, M.woodDark, { uv: 1.2 });
+  slats('x', -CW, CW, CZ0 - 0.02, CZ0, () => [Y0 + 0.1, CH - 0.05], M.slat, 0.06, 0.04);
+  boxMM(-CW - 0.01, CW + 0.01, CH - 0.03, CH, CZ0 - 0.03, CZ1 + 0.01, MX.marbleBlack);
+  boxMM(-0.78, 0.78, CH - 0.002, CH + 0.002, TVLZ - 0.035, TVLZ + 0.035, M.dark, { cast: false });       // lift slot
+  boxMM(-CW + 0.05, CW - 0.05, Y0 + 0.07, Y0 + 0.08, CZ0 + 0.035, CZ0 + 0.045, glowMat(0xffc27a, 3.5), { cast: false });
+  floorWash(-CW, CW, Y0 + 0.006, CZ0, CZ0 - 0.55, 0.55);
   const tvTex = makeTex(640, 360, (g, w, h) => {
     const sky = g.createLinearGradient(0, 0, 0, h * 0.6); sky.addColorStop(0, '#2b2a6b'); sky.addColorStop(0.55, '#b5628c'); sky.addColorStop(1, '#ffb070');
     g.fillStyle = sky; g.fillRect(0, 0, w, h);
@@ -213,10 +228,10 @@ const TVZ = Z1 - 0.55;                                                // inner f
     const lake = g.createLinearGradient(0, h * 0.7, 0, h); lake.addColorStop(0, '#c98a8a'); lake.addColorStop(1, '#1c2a52'); g.fillStyle = lake; g.fillRect(0, h * 0.7, w, h * 0.3);
     g.fillStyle = 'rgba(255,255,255,0.75)'; for (const [x, y] of [[95, 105], [280, 95], [470, 112]]) { g.beginPath(); g.moveTo(x, y); g.lineTo(x - 28, y + 46); g.lineTo(x + 30, y + 44); g.fill(); }
   }, { clampEdge: true });
-  const TVY = Y0 + 1.4;
-  boxMM(-0.76, 0.76, TVY - 0.44, TVY + 0.44, TVZ - 0.045, TVZ - 0.005, M.blackMetal);
+  boxMM(-0.76, 0.76, -0.44, 0.44, TVLZ - 0.02, TVLZ + 0.02, M.blackMetal, { parent: tvLift, cast: false });
   const scr = new THREE.Mesh(new THREE.PlaneGeometry(1.46, 0.82), new THREE.MeshBasicMaterial({ map: tvTex, color: new THREE.Color(1.5, 1.5, 1.5) }));
-  scr.rotation.y = Math.PI; scr.position.set(0, TVY, TVZ - 0.047); scene.add(scr);
+  scr.rotation.y = Math.PI; scr.position.set(0, 0, TVLZ - 0.022); tvLift.add(scr);
+  boxMM(-0.03, 0.03, -0.9, -0.44, TVLZ - 0.01, TVLZ + 0.01, M.blackMetal, { parent: tvLift, cast: false });   // lift column
 }
 
 // ---------------------------------------------------------------- U-shaped sofa, fire table, heater
