@@ -28,7 +28,7 @@ function applyState(st, t) {
   for (const m of louvers) m.rotation.x = a;
   fan.rotation.y = t * 2.6;
   updateFire(t);
-  const tv = ease(st.tv || 0); tvLift.position.y = TV_DOWN + (TV_UP - TV_DOWN) * tv; tvLift.visible = tv > 0.002;
+  setTV(ease(st.tv || 0));
   const key = st.louver.toFixed(3);
   if (key !== lastStateKey) { renderer.shadowMap.needsUpdate = true; lastStateKey = key; }
 }

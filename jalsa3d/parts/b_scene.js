@@ -3,6 +3,7 @@
 const PW = 6.0, PD = 5.0, PH = 3.0, PLAT = 0.6;            // pergola width, depth, height above the platform; platform height
 const X1 = PW / 2, Z1 = PD / 2, Y0 = PLAT, YT = PLAT + PH, YB = YT - 0.25;   // YB = underside of the roof beams
 const PX = X1 + 0.3, PZ = Z1 + 0.3;                              // platform half-size
+const TVOPT = params.get('tvopt') || 'lift';                     // lift | projector | drop | arm
 const cloneTex = (t, rx, ry) => { const c = t.clone(); c.needsUpdate = true; c.repeat.set(rx, ry); return c; };
 const MX = {
   paving: std({ map: cloneTex(pavingTex, 45, 45), color: 0xb9ae9e, roughness: 0.5, envMapIntensity: 1.6 }),
@@ -134,7 +135,7 @@ function planter(x0, x1, z0, z1, h, y0 = 0) {
   planter(SX0 - 1.35, SX0 - 0.15, zp, zp + 0.74, 0.5);                  // left of the steps
   miniTree(SX0 - 0.75, 0.5, zp + 0.36, 1.7, 0.55, 1000, [0.24, 0.38, 0.32]); shrub(SX0 - 0.45, zp + 0.44, 0.22, 200, [0.27, 0.5, 0.26], 0.45);
   // tall plants inside: beside the TV wall and on the left wall
-  for (const [x, z] of [[1.56, Z1 - 0.42], [-X1 + 0.36, 1.05]]) {
+  for (const [x, z] of [[1.56, Z1 - 0.42], ...(TVOPT === 'arm' ? [] : [[-X1 + 0.36, 1.05]])]) {
     boxMM(x - 0.19, x + 0.19, Y0, Y0 + 0.5, z - 0.19, z + 0.19, MX.stoneBeige);
     miniTree(x, Y0 + 0.5, z, 1.7, 0.34, 650, [0.26, 0.45, 0.28], 0.12);
   }
@@ -163,8 +164,9 @@ const fan = new THREE.Group(); scene.add(fan);
   boxMM(-X1 + P + 0.012, -X1 + P + 0.03, yl - 0.012, yl, -Z1 + P, Z1 - P, M.led, { cast: false }); boxMM(X1 - P - 0.03, X1 - P - 0.012, yl - 0.012, yl, -Z1 + P, Z1 - P, M.led, { cast: false });
   boxMM(-X1 + 0.02, X1 - 0.02, YB - 0.012, YB, Z1 + 0.001, Z1 + 0.012, M.led, { cast: false });               // outer front line
   // ceiling fan
-  cyl(0.018, 0.018, 0.34, M.blackMetal, 0, YB - 0.14, -0.45, { cast: false });
-  fan.position.set(0, YB - 0.36, -0.45);
+  const FANX = TVOPT === 'projector' ? 1.55 : 0;                  // keep the fan out of the projector beam
+  cyl(0.018, 0.018, 0.34, M.blackMetal, FANX, YB - 0.14, -0.45, { cast: false });
+  fan.position.set(FANX, YB - 0.36, -0.45);
   cyl(0.1, 0.12, 0.13, M.blackMetal, 0, 0, 0, { parent: fan, cast: false });
   for (let i = 0; i < 5; i++) {
     const b = new THREE.Group(); b.rotation.y = i / 5 * Math.PI * 2; fan.add(b);
@@ -183,6 +185,7 @@ const GX0 = -X1 + 0.14, GX1 = X1 - 0.14, GP = (GX1 - GX0) / 5;        // five fr
 const TVZ = Z1 - 0.65;                                                // front face (sofa side) of the TV-lift cabinet
 const TVLZ = TVZ + 0.2, TV_DOWN = Y0 + 0.46, TV_UP = Y0 + 1.4;        // TV plane and its centre height when hidden / raised
 const tvLift = new THREE.Group(); scene.add(tvLift);
+let setTV = () => {};
 {
   const ZG = Z1 - 0.07;
   boxMM(GX0, GX1, YB - 0.05, YB, ZG - 0.06, ZG + 0.03, M.alu, { cast: false }); boxMM(GX0, GX1, Y0, Y0 + 0.012, ZG - 0.06, ZG + 0.03, M.alu, { cast: false });   // tracks
@@ -205,20 +208,11 @@ const tvLift = new THREE.Group(); scene.add(tvLift);
     boxMM(x - 0.03, x + 0.03, SY + 0.14, SY + 0.146, -Z1 + 0.09, -Z1 + 0.15, M.ledHot, { cast: false }); boxMM(x - 0.03, x + 0.03, SY - 0.146, SY - 0.14, -Z1 + 0.09, -Z1 + 0.15, M.ledHot, { cast: false });
     const w = new THREE.Mesh(new THREE.PlaneGeometry(1.1, ph), wm()); w.position.set(x, (Y0 + YB) / 2, -Z1 + 0.086); scene.add(w);
   }
-  for (const z of [-0.9, 1.0]) {
+  for (const z of (TVOPT === 'arm' ? [-0.9, 0.05] : [-0.9, 1.0])) {
     boxMM(-X1 + 0.08, -X1 + 0.16, SY - 0.14, SY + 0.14, z - 0.04, z + 0.04, M.blackMetal);
     boxMM(-X1 + 0.09, -X1 + 0.15, SY + 0.14, SY + 0.146, z - 0.03, z + 0.03, M.ledHot, { cast: false }); boxMM(-X1 + 0.09, -X1 + 0.15, SY - 0.146, SY - 0.14, z - 0.03, z + 0.03, M.ledHot, { cast: false });
     const w = new THREE.Mesh(new THREE.PlaneGeometry(1.1, ph), wm()); w.rotation.y = Math.PI / 2; w.position.set(-X1 + 0.086, (Y0 + YB) / 2, z); scene.add(w);
   }
-  // TV-lift cabinet in front of the glass (1.80 x 0.45 x 0.90 m); the 65" TV rises out of it
-  const CW = 0.9, CZ0 = TVZ, CZ1 = TVZ + 0.45, CH = Y0 + 0.9;
-  boxMM(-CW + 0.04, CW - 0.04, Y0, Y0 + 0.08, CZ0 + 0.04, CZ1 - 0.02, M.dark);
-  boxMM(-CW, CW, Y0 + 0.08, CH - 0.03, CZ0, CZ1, M.woodDark, { uv: 1.2 });
-  slats('x', -CW, CW, CZ0 - 0.02, CZ0, () => [Y0 + 0.1, CH - 0.05], M.slat, 0.06, 0.04);
-  boxMM(-CW - 0.01, CW + 0.01, CH - 0.03, CH, CZ0 - 0.03, CZ1 + 0.01, MX.marbleBlack);
-  boxMM(-0.78, 0.78, CH - 0.002, CH + 0.002, TVLZ - 0.035, TVLZ + 0.035, M.dark, { cast: false });       // lift slot
-  boxMM(-CW + 0.05, CW - 0.05, Y0 + 0.07, Y0 + 0.08, CZ0 + 0.035, CZ0 + 0.045, glowMat(0xffc27a, 3.5), { cast: false });
-  floorWash(-CW, CW, Y0 + 0.006, CZ0, CZ0 - 0.55, 0.55);
   const tvTex = makeTex(640, 360, (g, w, h) => {
     const sky = g.createLinearGradient(0, 0, 0, h * 0.6); sky.addColorStop(0, '#2b2a6b'); sky.addColorStop(0.55, '#b5628c'); sky.addColorStop(1, '#ffb070');
     g.fillStyle = sky; g.fillRect(0, 0, w, h);
@@ -228,10 +222,78 @@ const tvLift = new THREE.Group(); scene.add(tvLift);
     const lake = g.createLinearGradient(0, h * 0.7, 0, h); lake.addColorStop(0, '#c98a8a'); lake.addColorStop(1, '#1c2a52'); g.fillStyle = lake; g.fillRect(0, h * 0.7, w, h * 0.3);
     g.fillStyle = 'rgba(255,255,255,0.75)'; for (const [x, y] of [[95, 105], [280, 95], [470, 112]]) { g.beginPath(); g.moveTo(x, y); g.lineTo(x - 28, y + 46); g.lineTo(x + 30, y + 44); g.fill(); }
   }, { clampEdge: true });
-  boxMM(-0.76, 0.76, -0.44, 0.44, TVLZ - 0.02, TVLZ + 0.02, M.blackMetal, { parent: tvLift, cast: false });
-  const scr = new THREE.Mesh(new THREE.PlaneGeometry(1.46, 0.82), new THREE.MeshBasicMaterial({ map: tvTex, color: new THREE.Color(1.5, 1.5, 1.5) }));
-  scr.rotation.y = Math.PI; scr.position.set(0, 0, TVLZ - 0.022); tvLift.add(scr);
-  boxMM(-0.03, 0.03, -0.9, -0.44, TVLZ - 0.01, TVLZ + 0.01, M.blackMetal, { parent: tvLift, cast: false });   // lift column
+  const tvScreen = (parent, z) => {
+    boxMM(-0.76, 0.76, -0.44, 0.44, z - 0.02, z + 0.02, M.blackMetal, { parent, cast: false });
+    const sc = new THREE.Mesh(new THREE.PlaneGeometry(1.46, 0.82), new THREE.MeshBasicMaterial({ map: tvTex, color: new THREE.Color(1.5, 1.5, 1.5) }));
+    sc.rotation.y = Math.PI; sc.position.set(0, 0, z - 0.022); parent.add(sc); screens.push(sc);
+  };
+  const screens = [], screenOn = (on) => { for (const sc of screens) { sc.material.color.setScalar(on ? 1.5 : 0.025); sc.material.map = on ? tvTex : null; sc.material.needsUpdate = true; } };
+  const rod = (mat, r = 0.022) => { const m = new THREE.Mesh(new THREE.CylinderGeometry(r, r, 1, 10), mat); scene.add(m); return m; };
+  const _a = new THREE.Vector3(), _b = new THREE.Vector3(), _up = new THREE.Vector3(0, 1, 0);
+  const placeRod = (m, a, b) => { _b.subVectors(b, a); m.position.copy(a).addScaledVector(_b, 0.5); m.scale.set(1, _b.length(), 1); m.quaternion.setFromUnitVectors(_up, _b.normalize()); };
+  if (TVOPT === 'lift') {
+    // TV-lift cabinet in front of the glass (1.80 x 0.45 x 0.90 m); the 65" TV rises out of it
+    const CW = 0.9, CZ0 = TVZ, CZ1 = TVZ + 0.45, CH = Y0 + 0.9;
+    boxMM(-CW + 0.04, CW - 0.04, Y0, Y0 + 0.08, CZ0 + 0.04, CZ1 - 0.02, M.dark);
+    boxMM(-CW, CW, Y0 + 0.08, CH - 0.03, CZ0, CZ1, M.woodDark, { uv: 1.2 });
+    slats('x', -CW, CW, CZ0 - 0.02, CZ0, () => [Y0 + 0.1, CH - 0.05], M.slat, 0.06, 0.04);
+    boxMM(-CW - 0.01, CW + 0.01, CH - 0.03, CH, CZ0 - 0.03, CZ1 + 0.01, MX.marbleBlack);
+    boxMM(-0.78, 0.78, CH - 0.002, CH + 0.002, TVLZ - 0.035, TVLZ + 0.035, M.dark, { cast: false });       // lift slot
+    boxMM(-CW + 0.05, CW - 0.05, Y0 + 0.07, Y0 + 0.08, CZ0 + 0.035, CZ0 + 0.045, glowMat(0xffc27a, 3.5), { cast: false });
+    floorWash(-CW, CW, Y0 + 0.006, CZ0, CZ0 - 0.55, 0.55);
+    tvScreen(tvLift, TVLZ);
+    boxMM(-0.03, 0.03, -0.9, -0.44, TVLZ - 0.01, TVLZ + 0.01, M.blackMetal, { parent: tvLift, cast: false });   // lift column
+    setTV = (v) => { tvLift.position.y = TV_DOWN + (TV_UP - TV_DOWN) * v; tvLift.visible = v > 0.002; };
+  } else if (TVOPT === 'projector') {
+    // 110" motorised screen in a cassette under the front beam; projector hidden under the rear beam
+    const SZ = Z1 - 0.3, SW = 2.6, DROP = 1.64, CY = YB - 0.13, IW = 2.44, IH = 1.37;
+    boxMM(-SW / 2 - 0.1, SW / 2 + 0.1, CY, YB, SZ - 0.07, SZ + 0.07, M.blackMetal);
+    const sg = new THREE.PlaneGeometry(SW, 1); sg.translate(0, -0.5, 0);
+    const fabric = new THREE.Mesh(sg, new THREE.MeshStandardMaterial({ color: 0xf1f0ec, roughness: 0.9, side: THREE.DoubleSide })); fabric.position.set(0, CY, SZ); scene.add(fabric);
+    const bar = boxMM(-SW / 2 - 0.02, SW / 2 + 0.02, -0.035, 0, SZ - 0.015, SZ + 0.015, M.blackMetal, { cast: false });
+    const img = new THREE.Mesh(new THREE.PlaneGeometry(IW, IH), new THREE.MeshBasicMaterial({ map: tvTex, color: new THREE.Color(1.25, 1.25, 1.25) }));
+    img.rotation.y = Math.PI; scene.add(img);
+    const PZp = -Z1 + 0.5, PY = YB - 0.09;
+    boxMM(-0.21, 0.21, YB - 0.17, YB - 0.01, PZp - 0.2, PZp + 0.15, M.blackMetal);
+    { const l = cyl(0.045, 0.045, 0.03, glowMat(0xbfd0ff, 2.5), 0, PY, PZp + 0.165, { cast: false }); l.rotation.x = Math.PI / 2; }
+    const iy = CY - DROP + 0.08 + IH / 2;
+    const bg = new THREE.BufferGeometry(), apex = [0, PY, PZp + 0.18], c = (sx, sy) => [sx * IW / 2, iy + sy * IH / 2, SZ - 0.01];
+    bg.setAttribute('position', new THREE.Float32BufferAttribute([...apex, ...c(-1, -1), ...c(1, -1), ...apex, ...c(1, -1), ...c(1, 1), ...apex, ...c(1, 1), ...c(-1, 1), ...apex, ...c(-1, 1), ...c(-1, -1)], 3));
+    const beam = new THREE.Mesh(bg, new THREE.MeshBasicMaterial({ color: new THREE.Color(0x9fb4ff).multiplyScalar(0.05), blending: THREE.AdditiveBlending, transparent: true, depthWrite: false, side: THREE.DoubleSide }));
+    scene.add(beam);
+    setTV = (v) => {
+      const d = 0.03 + DROP * v;
+      fabric.scale.y = d; bar.position.y = CY - d;
+      img.visible = beam.visible = v > 0.97; img.position.set(0, iy, SZ - 0.006);
+    };
+  } else if (TVOPT === 'drop') {
+    // 65" TV on a motorised flip-down mount under the centre roof beam: folds flat under the roof, flips down and lowers 0.55 m
+    const HZ = 1.25, HY = YB - 0.08, LOW = 0.55;
+    boxMM(-0.28, 0.28, YB - 0.06, YB + 0.03, HZ - 0.12, HZ + 0.98, M.blackMetal);
+    const pivot = new THREE.Group(); scene.add(pivot);
+    const tvG = new THREE.Group(); tvG.position.y = -0.44; pivot.add(tvG); tvScreen(tvG, -0.02);
+    const arms = [-0.45, 0.45].map(() => rod(M.blackMetal, 0.018));
+    setTV = (v) => {
+      const s1 = clamp(v / 0.5), s2 = clamp((v - 0.5) / 0.5), y = HY - LOW * ease(s2);
+      pivot.position.set(0, y, HZ); pivot.rotation.x = -(Math.PI / 2) * (1 - ease(s1)); screenOn(v > 0.97);
+      arms.forEach((m, i) => { const x = i ? 0.45 : -0.45; m.visible = s2 > 0.001; placeRod(m, _a.set(x, YB - 0.06, HZ), new THREE.Vector3(x, y - 0.01, HZ)); });
+    };
+  } else if (TVOPT === 'arm') {
+    // 65" TV on an articulating arm on the left slat wall near the front corner: flat on the wall when closed, pulled out and turned to the sofa when open
+    const WX = -X1 + 0.08, AZ = 1.55, AY = Y0 + 1.45;
+    boxMM(WX, WX + 0.03, AY - 0.22, AY + 0.22, AZ - 0.14, AZ + 0.14, M.blackMetal);
+    const tvG = new THREE.Group(); scene.add(tvG); tvScreen(tvG, 0);
+    const a1 = rod(M.blackMetal, 0.025), a2 = rod(M.blackMetal, 0.025), elbow = new THREE.Vector3();
+    setTV = (v) => {
+      const e = ease(v), px = WX + 0.07 + 0.62 * e, pz = AZ - 0.15 * e;
+      const dx = 0.3 - px, dz = -1.6 - pz, open = Math.atan2(-dx, -dz);
+      tvG.position.set(px, AY, pz); tvG.rotation.y = -Math.PI / 2 + (open + Math.PI / 2) * e; screenOn(v > 0.97);
+      const back = new THREE.Vector3(Math.sin(tvG.rotation.y), 0, Math.cos(tvG.rotation.y)).multiplyScalar(0.03).add(tvG.position);
+      const wall = _a.set(WX + 0.03, AY, AZ);
+      elbow.set((wall.x + back.x) / 2 + 0.05 * e, AY, (wall.z + back.z) / 2 + 0.28 * e);
+      a1.visible = a2.visible = e > 0.02; placeRod(a1, wall, elbow); placeRod(a2, elbow, back);
+    };
+  }
 }
 
 // ---------------------------------------------------------------- U-shaped sofa, fire table, heater

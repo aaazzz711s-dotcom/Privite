@@ -15,3 +15,10 @@ function frame(t) {
 
 window.renderFrame = (t, quality = 0.93) => { frame(t); return out.toDataURL('image/jpeg', quality).slice('data:image/jpeg;base64,'.length); };
 window.renderStill = (t) => { frame(t); return out.toDataURL('image/png').slice('data:image/png;base64,'.length); };
+window.renderView = (cam, fov, st, t, cap) => {     // single still with a fixed camera and state (used for the TV options)
+  camera.position.set(cam[0], cam[1], cam[2]); camera.lookAt(cam[3], cam[4], cam[5]); camera.fov = fov; camera.updateProjectionMatrix();
+  applyState(st, t); renderer.shadowMap.needsUpdate = true; composer.render();
+  ctx.globalAlpha = 1; ctx.drawImage(renderer.domElement, 0, 0);
+  if (cap) caption(cap[0], cap[1], 1, cap[2]);
+  return out.toDataURL('image/png').slice('data:image/png;base64,'.length);
+};
