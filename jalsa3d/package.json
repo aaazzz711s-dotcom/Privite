@@ -1,0 +1,12 @@
+{
+  "name": "jalsa3d",
+  "private": true,
+  "description": "3D model and video tour of the outdoor lounge pergola (8.00 x 3.00 m, winter mode)",
+  "scripts": {
+    "render": "node render.js --out tour.mp4",
+    "stills": "node render.js --stills 3,9,21,35,40,44,50"
+  },
+  "dependencies": {
+    "three": "0.170.0"
+  }
+}
